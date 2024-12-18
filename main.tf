@@ -1,11 +1,9 @@
-provider "aws" {
-  region = "eu-west-1"
-}
-
 # EC2 instance for WordPress
+# Can be data instead of resource
 resource "aws_instance" "wordpress" {
   ami           = "ami-04bd4a6a67aa8e86e" # Amazon Linux 2 AMI for eu-west-1
   instance_type = "t2.micro"              # Free Tier eligible
+  iam_instance_profile = aws_iam_instance_profile.ec2_profile.name
   key_name      = var.key_name
 
   user_data = templatefile("user_data.sh", {
@@ -80,6 +78,7 @@ resource "aws_db_instance" "wordpress_db" {
   username             = var.db_username
   password             = var.db_password
   publicly_accessible  = true
+  skip_final_snapshot  = true
   vpc_security_group_ids = [aws_security_group.rds_sg.id]
 
   tags = {
